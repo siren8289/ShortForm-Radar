@@ -1,5 +1,6 @@
 import { FunctionComponent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from './layout/PageHeader';
 import styles from './LandingPage.module.css';
 
 const LandingPage: FunctionComponent = () => {
@@ -80,18 +81,15 @@ const LandingPage: FunctionComponent = () => {
   return (
     <div className={styles.landingPage}>
       {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerContainer}>
-          <div className={styles.logoContainer}>
-            <div className={styles.logoIcon}></div>
-            <span className={styles.logoText}>ShortForm Radar</span>
-          </div>
+      <PageHeader
+        showMenu={false}
+        actions={
           <div className={styles.headerButtons}>
             <button className={styles.loginButton} onClick={() => navigate('/login')}>로그인</button>
             <button className={styles.startButton} onClick={() => navigate('/dashboard')}>무료로 시작하기</button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Hero Section */}
       <section className={styles.heroSection}>

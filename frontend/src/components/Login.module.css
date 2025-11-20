@@ -118,7 +118,7 @@
 .cardTitle {
   font-size: 24px;
   font-weight: 500;
-  margin: 0 0 8px;
+  margin: 0 0 0px;
 }
 
 .cardSubtitle {
@@ -161,7 +161,7 @@
 }
 
 .input {
-  width: 100%;
+  width: 90%;
   height: 100%;
   padding: 0 12px 0 40px;
   border-radius: 8px;
