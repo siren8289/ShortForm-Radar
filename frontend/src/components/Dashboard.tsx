@@ -1,31 +1,80 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTopTrends } from '../hooks/useTrends';
+import { Trend } from '../api/trends';
 import styles from './Dashboard.module.css';
+
+const fallbackTrends = [
+  { id: 1, title: '겨울 패션 하울', platform: 'TikTok', growth: '+245%', views: '2.4M', engagement: '18.5%' },
+  { id: 2, title: '홈카페 레시피', platform: 'Instagram', growth: '+189%', views: '1.8M', engagement: '22.3%' },
+  { id: 3, title: 'AI 도구 활용법', platform: 'YouTube', growth: '+312%', views: '3.2M', engagement: '25.7%' },
+  { id: 4, title: '아침 루틴 챌린지', platform: 'TikTok', growth: '+156%', views: '1.5M', engagement: '19.8%' },
+  { id: 5, title: '운동 모티베이션', platform: 'Instagram', growth: '+203%', views: '2.1M', engagement: '20.1%' },
+  { id: 6, title: '요리 꿀팁', platform: 'YouTube', growth: '+178%', views: '1.9M', engagement: '17.4%' },
+  { id: 7, title: '여행 VLOG', platform: 'TikTok', growth: '+267%', views: '2.8M', engagement: '23.6%' },
+  { id: 8, title: '메이크업 튜토리얼', platform: 'Instagram', growth: '+234%', views: '2.5M', engagement: '21.9%' },
+  { id: 9, title: '생산성 해킹', platform: 'YouTube', growth: '+198%', views: '2.0M', engagement: '24.2%' },
+  { id: 10, title: '반려동물 일상', platform: 'TikTok', growth: '+289%', views: '3.1M', engagement: '26.8%' },
+  { id: 11, title: '인테리어 팁', platform: 'Instagram', growth: '+167%', views: '1.7M', engagement: '18.9%' },
+  { id: 12, title: '독서 리뷰', platform: 'YouTube', growth: '+145%', views: '1.4M', engagement: '16.7%' },
+  { id: 13, title: '스트레칭 루틴', platform: 'TikTok', growth: '+223%', views: '2.3M', engagement: '22.5%' },
+  { id: 14, title: '재테크 노하우', platform: 'Instagram', growth: '+201%', views: '2.2M', engagement: '20.8%' },
+  { id: 15, title: '사진 촬영 팁', platform: 'YouTube', growth: '+187%', views: '1.9M', engagement: '19.3%' },
+  { id: 16, title: '영어 공부법', platform: 'TikTok', growth: '+256%', views: '2.7M', engagement: '24.1%' },
+  { id: 17, title: '명상 가이드', platform: 'Instagram', growth: '+134%', views: '1.3M', engagement: '17.2%' },
+  { id: 18, title: '게임 하이라이트', platform: 'YouTube', growth: '+298%', views: '3.0M', engagement: '27.3%' },
+  { id: 19, title: '댄스 챌린지', platform: 'TikTok', growth: '+321%', views: '3.4M', engagement: '28.9%' },
+  { id: 20, title: '직장인 브이로그', platform: 'Instagram', growth: '+176%', views: '1.8M', engagement: '18.6%' },
+];
+
+const compactFormatter = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+const formatPlatformLabel = (platform?: string) => {
+  switch (platform?.toUpperCase()) {
+    case 'TIKTOK':
+      return 'TikTok';
+    case 'REELS':
+    case 'INSTAGRAM':
+      return 'Instagram';
+    case 'SHORTS':
+    case 'YOUTUBE':
+      return 'YouTube';
+    default:
+      return platform ?? 'TikTok';
+  }
+};
+
+const formatGrowth = (growthRate?: number) => {
+  if (growthRate === undefined || growthRate === null) return '—';
+  const value = growthRate >= 0 ? `+${growthRate}` : `${growthRate}`;
+  return `${value}%`;
+};
+
+const formatViews = (views?: number) => {
+  if (!views) return '—';
+  return compactFormatter.format(views);
+};
 
 const Dashboard: FunctionComponent = () => {
   const navigate = useNavigate();
-  const trends = [
-    { id: 1, title: '겨울 패션 하울', platform: 'TikTok', growth: '+245%', views: '2.4M', engagement: '18.5%' },
-    { id: 2, title: '홈카페 레시피', platform: 'Instagram', growth: '+189%', views: '1.8M', engagement: '22.3%' },
-    { id: 3, title: 'AI 도구 활용법', platform: 'YouTube', growth: '+312%', views: '3.2M', engagement: '25.7%' },
-    { id: 4, title: '아침 루틴 챌린지', platform: 'TikTok', growth: '+156%', views: '1.5M', engagement: '19.8%' },
-    { id: 5, title: '운동 모티베이션', platform: 'Instagram', growth: '+203%', views: '2.1M', engagement: '20.1%' },
-    { id: 6, title: '요리 꿀팁', platform: 'YouTube', growth: '+178%', views: '1.9M', engagement: '17.4%' },
-    { id: 7, title: '여행 VLOG', platform: 'TikTok', growth: '+267%', views: '2.8M', engagement: '23.6%' },
-    { id: 8, title: '메이크업 튜토리얼', platform: 'Instagram', growth: '+234%', views: '2.5M', engagement: '21.9%' },
-    { id: 9, title: '생산성 해킹', platform: 'YouTube', growth: '+198%', views: '2.0M', engagement: '24.2%' },
-    { id: 10, title: '반려동물 일상', platform: 'TikTok', growth: '+289%', views: '3.1M', engagement: '26.8%' },
-    { id: 11, title: '인테리어 팁', platform: 'Instagram', growth: '+167%', views: '1.7M', engagement: '18.9%' },
-    { id: 12, title: '독서 리뷰', platform: 'YouTube', growth: '+145%', views: '1.4M', engagement: '16.7%' },
-    { id: 13, title: '스트레칭 루틴', platform: 'TikTok', growth: '+223%', views: '2.3M', engagement: '22.5%' },
-    { id: 14, title: '재테크 노하우', platform: 'Instagram', growth: '+201%', views: '2.2M', engagement: '20.8%' },
-    { id: 15, title: '사진 촬영 팁', platform: 'YouTube', growth: '+187%', views: '1.9M', engagement: '19.3%' },
-    { id: 16, title: '영어 공부법', platform: 'TikTok', growth: '+256%', views: '2.7M', engagement: '24.1%' },
-    { id: 17, title: '명상 가이드', platform: 'Instagram', growth: '+134%', views: '1.3M', engagement: '17.2%' },
-    { id: 18, title: '게임 하이라이트', platform: 'YouTube', growth: '+298%', views: '3.0M', engagement: '27.3%' },
-    { id: 19, title: '댄스 챌린지', platform: 'TikTok', growth: '+321%', views: '3.4M', engagement: '28.9%' },
-    { id: 20, title: '직장인 브이로그', platform: 'Instagram', growth: '+176%', views: '1.8M', engagement: '18.6%' },
-  ];
+  const { data: remoteTrends, isLoading, error } = useTopTrends(20);
+
+  const trends = useMemo(() => {
+    if (remoteTrends && remoteTrends.length > 0) {
+      return remoteTrends.map((trend: Trend) => ({
+        id: trend.id,
+        title: trend.title,
+        platform: formatPlatformLabel(trend.platform),
+        growth: formatGrowth(trend.growthRate),
+        views: `${formatViews(trend.viewCount)}`,
+        engagement: '—',
+      }));
+    }
+    return fallbackTrends;
+  }, [remoteTrends]);
 
   const getPlatformColor = (platform: string) => {
     switch (platform) {
@@ -134,9 +183,14 @@ const Dashboard: FunctionComponent = () => {
         {/* Trending Content Section */}
         <div className={styles.trendingSection}>
           <div className={styles.trendingHeader}>
-            <h2 className={styles.trendingTitle}>트렌딩 콘텐츠 (20)</h2>
-            <span className={styles.trendingPeriod}>최근 7일</span>
+            <h2 className={styles.trendingTitle}>트렌딩 콘텐츠 ({trends.length})</h2>
+            <span className={styles.trendingPeriod}>
+              {isLoading ? '실시간 데이터를 가져오는 중입니다...' : '최근 7일'}
+            </span>
           </div>
+          {error && (
+            <p className={styles.trendingError}>데이터를 불러오지 못했습니다: {error.message}</p>
+          )}
           <div className={styles.trendsGrid}>
             {trends.map((trend) => (
               <div key={trend.id} className={styles.trendCard}>
@@ -198,43 +252,6 @@ const Dashboard: FunctionComponent = () => {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContainer}>
-          <div className={styles.footerTop}>
-            <div className={styles.footerLogo}>
-              <div className={styles.footerLogoIcon}></div>
-              <span className={styles.footerLogoText}>ShortForm Radar</span>
-            </div>
-            <div className={styles.footerLinks}>
-              <a href="#" className={styles.footerLink}>이용약관</a>
-              <a href="#" className={styles.footerLink}>개인정보처리방침</a>
-              <a href="#" className={styles.footerLink}>데이터 출처</a>
-            </div>
-          </div>
-          <div className={styles.footerDataSources}>
-            <span className={styles.dataSourceLabel}>데이터 출처:</span>
-            <div className={styles.dataSourceList}>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#fe2c55' }}></div>
-                <span>TikTok API</span>
-              </div>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#9d4edd' }}></div>
-                <span>Instagram Graph API</span>
-              </div>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#25f4ee' }}></div>
-                <span>YouTube Data API</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.footerCopyright}>
-            © 2025 ShortForm Radar. All rights reserved.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

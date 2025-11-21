@@ -1,16 +1,22 @@
-import { FunctionComponent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FunctionComponent, useEffect, useState } from 'react';
+import { getMe, getStoredUser, User } from '../api/auth';
 import styles from './Settings.module.css';
-import UserMenu from './UserMenu';
 
 const Settings: FunctionComponent = () => {
-  const navigate = useNavigate();
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
     weeklyReport: false,
     marketing: false,
   });
+  const [user, setUser] = useState<User | null>(getStoredUser());
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getMe()
+      .then(setUser)
+      .catch((err) => setError(err.message ?? '사용자 정보를 불러오지 못했습니다.'));
+  }, []);
 
   const handleToggle = (key: keyof typeof notifications) => {
     setNotifications((prev) => ({
@@ -19,25 +25,17 @@ const Settings: FunctionComponent = () => {
     }));
   };
 
+  const joinedAt = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-';
+
   return (
     <div className={styles.settings}>
-      {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerContainer}>
-          <div className={styles.logoContainer} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <div className={styles.logoIcon}></div>
-            <span className={styles.logoText}>ShortForm Radar</span>
-          </div>
-          <UserMenu />
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className={styles.main}>
         {/* Title Section */}
         <div className={styles.titleSection}>
           <h1 className={styles.pageTitle}>설정</h1>
           <p className={styles.pageDescription}>계정 및 알림 설정을 관리하세요</p>
+          {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
 
         {/* Settings Sections */}
@@ -54,7 +52,7 @@ const Settings: FunctionComponent = () => {
             <div className={styles.cardContent}>
               <div className={styles.infoField}>
                 <label className={styles.fieldLabel}>이메일</label>
-                <p className={styles.fieldValue}>hong@example.com</p>
+                <p className={styles.fieldValue}>{user?.email ?? '로그인이 필요합니다'}</p>
               </div>
               <div className={styles.divider}></div>
               <div className={styles.infoField}>
@@ -64,7 +62,7 @@ const Settings: FunctionComponent = () => {
                   </svg>
                   <div>
                     <label className={styles.fieldLabel}>가입일</label>
-                    <p className={styles.fieldValue}>2024년 1월 15일</p>
+                    <p className={styles.fieldValue}>{joinedAt}</p>
                   </div>
                 </div>
               </div>
@@ -162,43 +160,6 @@ const Settings: FunctionComponent = () => {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContainer}>
-          <div className={styles.footerTop}>
-            <div className={styles.footerLogo}>
-              <div className={styles.footerLogoIcon}></div>
-              <span className={styles.footerLogoText}>ShortForm Radar</span>
-            </div>
-            <div className={styles.footerLinks}>
-              <a href="#" className={styles.footerLink}>이용약관</a>
-              <a href="#" className={styles.footerLink}>개인정보처리방침</a>
-              <a href="#" className={styles.footerLink}>데이터 출처</a>
-            </div>
-          </div>
-          <div className={styles.footerDataSources}>
-            <span className={styles.dataSourceLabel}>데이터 출처:</span>
-            <div className={styles.dataSourceList}>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#fe2c55' }}></div>
-                <span>TikTok API</span>
-              </div>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#9d4edd' }}></div>
-                <span>Instagram Graph API</span>
-              </div>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#25f4ee' }}></div>
-                <span>YouTube Data API</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.footerCopyright}>
-            © 2025 ShortForm Radar. All rights reserved.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -1,10 +1,41 @@
 import { FunctionComponent, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSearchTrends } from '../hooks/useTrends';
+import { Trend } from '../api/trends';
 import styles from './TrendSearch.module.css';
 
 const platformOptions = ['모든 플랫폼', 'TikTok', 'Instagram', 'YouTube'];
 const categoryOptions = ['모든 카테고리', '라이프스타일', '교육', '엔터테인먼트'];
 const sortOptions = ['성장률순', '조회수순', '참여율순'];
+
+const formatPlatformLabel = (platform?: string) => {
+  switch (platform?.toUpperCase()) {
+    case 'TIKTOK':
+      return 'TikTok';
+    case 'REELS':
+      return 'Instagram Reels';
+    case 'SHORTS':
+      return 'YouTube Shorts';
+    default:
+      return platform ?? 'TikTok';
+  }
+};
+
+const formatGrowth = (growth?: number) => {
+  if (growth === undefined || growth === null) return '—';
+  const sign = growth >= 0 ? '+' : '';
+  return `${sign}${growth}%`;
+};
+
+const compactFormatter = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+const formatViews = (views?: number) => {
+  if (!views) return '—';
+  return `${compactFormatter.format(views)} 조회수`;
+};
 
 const TrendSearch: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -13,13 +44,26 @@ const TrendSearch: FunctionComponent = () => {
   const [categoryIndex, setCategoryIndex] = useState(0);
   const [sortIndex, setSortIndex] = useState(0);
 
-  const hasResults = false;
+  const { data: searchResults, isLoading, error } = useSearchTrends(searchTerm);
+  const results = searchResults ?? [];
+  const hasResults = results.length > 0;
 
   const summary = useMemo(() => {
     const term = searchTerm.trim();
-    if (!term) return '검색 결과가 없습니다';
-    return `“${term}”에 대한 결과가 없습니다`;
-  }, [searchTerm]);
+    if (!term) return '검색어를 입력하세요';
+    if (isLoading) return '검색 중입니다...';
+    if (error) return error.message ?? '검색 중 오류가 발생했습니다.';
+    if (!hasResults) return `“${term}”에 대한 결과가 없습니다`;
+    return '';
+  }, [searchTerm, isLoading, error, hasResults]);
+
+  const mappedResults = results.map((trend: Trend) => ({
+    id: trend.id,
+    title: trend.title,
+    platform: formatPlatformLabel(trend.platform),
+    growth: formatGrowth(trend.growthRate),
+    views: formatViews(trend.viewCount),
+  }));
 
   const handleReset = () => {
     setSearchTerm('');
@@ -92,9 +136,33 @@ const TrendSearch: FunctionComponent = () => {
 
         <section className={styles.resultsSection}>
           <div className={styles.resultsHeader}>
-            <h2 className={styles.resultsTitle}>검색 결과 (0)</h2>
+            <h2 className={styles.resultsTitle}>검색 결과 ({mappedResults.length})</h2>
+            {isLoading && <span className={styles.resultsStatus}>불러오는 중...</span>}
+            {error && <span className={styles.resultsStatusError}>오류: {error.message}</span>}
           </div>
-          {!hasResults && (
+          {hasResults ? (
+            <div className={styles.resultsGrid}>
+              {mappedResults.map((trend) => (
+                <article key={trend.id} className={styles.resultCard}>
+                  <div>
+                    <h3 className={styles.resultTitle}>{trend.title}</h3>
+                    <p className={styles.resultPlatform}>{trend.platform}</p>
+                  </div>
+                  <div className={styles.resultMeta}>
+                    <span>{trend.views}</span>
+                    <span>{trend.growth}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.resultButton}
+                    onClick={() => navigate(`/trend/${trend.id}`)}
+                  >
+                    자세히 보기
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>🔍</div>
               <p className={styles.emptyTitle}>{summary}</p>
@@ -106,47 +174,6 @@ const TrendSearch: FunctionComponent = () => {
           )}
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContainer}>
-          <div className={styles.footerTop}>
-            <div className={styles.footerLogo}>
-              <div className={styles.footerLogoIcon}></div>
-              <span className={styles.footerLogoText}>ShortForm Radar</span>
-            </div>
-            <div className={styles.footerLinks}>
-              <a href="#" className={styles.footerLink}>
-                이용약관
-              </a>
-              <a href="#" className={styles.footerLink}>
-                개인정보처리방침
-              </a>
-              <a href="#" className={styles.footerLink}>
-                데이터 출처
-              </a>
-            </div>
-          </div>
-          <div className={styles.footerDataSources}>
-            <span className={styles.dataSourceLabel}>데이터 출처:</span>
-            <div className={styles.dataSourceList}>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#fe2c55' }}></div>
-                <span>TikTok API</span>
-              </div>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#9d4edd' }}></div>
-                <span>Instagram Graph API</span>
-              </div>
-              <div className={styles.dataSourceItem}>
-                <div className={styles.dataSourceDot} style={{ backgroundColor: '#25f4ee' }}></div>
-                <span>YouTube Data API</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.footerCopyright}>© 2025 ShortForm Radar. All rights reserved.</div>
-        </div>
-      </footer>
     </div>
   );
 };

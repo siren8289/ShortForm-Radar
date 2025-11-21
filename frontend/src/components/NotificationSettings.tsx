@@ -1,7 +1,5 @@
 import { FunctionComponent, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './NotificationSettings.module.css';
-import UserMenu from './UserMenu';
 import StatCard from './common/StatCard';
 import GradientButton from './common/GradientButton';
 
@@ -13,7 +11,6 @@ type Keyword = {
 };
 
 const NotificationSettings: FunctionComponent = () => {
-  const navigate = useNavigate();
   const [keywordInput, setKeywordInput] = useState('');
   const [keywords, setKeywords] = useState<Keyword[]>([
     { id: 1, hashtag: '#홈카페', date: '2024-01-12', matches: 8 },
@@ -50,16 +47,6 @@ const NotificationSettings: FunctionComponent = () => {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerContainer}>
-          <div className={styles.logoContainer} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <div className={styles.logoIcon}></div>
-            <span className={styles.logoText}>ShortForm Radar</span>
-          </div>
-          <UserMenu />
-        </div>
-      </header>
-
       <main className={styles.main}>
         <section className={styles.titleSection}>
           <div className={styles.titleIcon}>🔔</div>

@@ -138,6 +138,22 @@
 
 .platformContent {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.platformStatus,
+.platformStatusError {
+  font-size: 14px;
+}
+
+.platformStatus {
+  color: #a0a0a0;
+}
+
+.platformStatusError {
+  color: #ff6b6b;
 }
 
 .trendsTitle {

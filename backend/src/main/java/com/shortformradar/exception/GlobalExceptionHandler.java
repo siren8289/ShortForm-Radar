@@ -22,6 +22,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(e.getMessage()));
     }
+
+    @ExceptionHandler(TrendNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleTrendNotFound(TrendNotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(e.getMessage()));
+    }
 }
 
 

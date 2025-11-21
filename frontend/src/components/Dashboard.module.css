@@ -306,6 +306,12 @@
   line-height: 20px;
 }
 
+.trendingError {
+  font-size: 14px;
+  color: #ff6b6b;
+  margin-bottom: 16px;
+}
+
 .trendsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

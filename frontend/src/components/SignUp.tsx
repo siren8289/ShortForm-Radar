@@ -1,6 +1,13 @@
 import { FunctionComponent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signup } from '../api/auth';
 import styles from './SignUp.module.css';
+
+// Import SVG icons from assets
+import backArrowIcon from '../assets/1d80a45a701e6bc73343d179556c42dc302e21fd.svg';
+import logoIcon from '../assets/35fdf9bb562bd3147c62807ac9f3402344e3235d.svg';
+import emailIcon from '../assets/88753f9926800c90d5ced166d16472f754a6ff67.svg';
+import lockIcon from '../assets/48c69e421b14cd97c578346c783c8da292220336.svg';
 
 const SignUp: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -10,6 +17,8 @@ const SignUp: FunctionComponent = () => {
     password: '',
     confirmPassword: '',
   });
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -18,155 +27,159 @@ const SignUp: FunctionComponent = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    if (formData.password !== formData.confirmPassword) {
+      setError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await signup(formData.email, formData.password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError((err as Error).message ?? '회원가입에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className={styles.signUp}>
-      <div className={styles.authPage}>
-        {/* Background Blur Effects */}
-        <div className={styles.backgroundContainer}>
-          <div className={styles.blurCircle1}></div>
-          <div className={styles.blurCircle2}></div>
-          <div className={styles.blurCircle3}></div>
+      <div className={styles.backgroundContainer}>
+        <div className={`${styles.blurCircle} ${styles.blurCirclePink}`} />
+        <div className={`${styles.blurCircle} ${styles.blurCircleTeal}`} />
+        <div className={`${styles.blurCircle} ${styles.blurCirclePurple}`} />
+      </div>
+
+      <div className={styles.content}>
+        <button className={styles.backButton} onClick={() => navigate('/')}>
+          <img src={backArrowIcon} alt="back" className={styles.backIcon} />
+          <span>홈으로</span>
+        </button>
+
+        <div className={styles.logoContainer}>
+          <img src={logoIcon} alt="ShortForm Radar" className={styles.logoIcon} />
+          <h1 className={styles.logoText}>ShortForm Radar</h1>
         </div>
 
-        {/* Main Content */}
-        <div className={styles.contentContainer}>
-          {/* Back Button */}
-          <button className={styles.backButton} onClick={() => navigate('/')}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>홈으로</span>
-          </button>
-
-          {/* Logo */}
-          <div className={styles.logoContainer}>
-            <div className={styles.logoIcon}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <path d="M20 5L30 15L20 25L10 15L20 5Z" fill="url(#logoGradient)"/>
-                <defs>
-                  <linearGradient id="logoGradient" x1="10" y1="5" x2="30" y2="25" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#fe2c55"/>
-                    <stop offset="1" stopColor="#9d4edd"/>
-                  </linearGradient>
-                </defs>
-              </svg>
+        <div className={styles.card}>
+          <div className={styles.cardInner}>
+            <div className={styles.cardHeader}>
+              <h2 className={styles.cardTitle}>회원가입</h2>
+              <p className={styles.cardSubtitle}>새로운 계정을 만들어보세요</p>
             </div>
-            <h1 className={styles.logoText}>ShortForm Radar</h1>
-          </div>
 
-          {/* Form Container */}
-          <div className={styles.formContainer}>
-            <div className={styles.formContent}>
-              <h2 className={styles.formTitle}>회원가입</h2>
-              <p className={styles.formSubtitle}>새로운 계정을 만들어보세요</p>
-
-              <form onSubmit={handleSubmit} className={styles.form}>
-                {/* Name Field */}
-                <div className={styles.formField}>
-                  <label className={styles.label}>이름</label>
-                  <div className={styles.inputWrapper}>
-                    <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M2 14C2 11.2386 4.23858 9 7 9H9C11.7614 9 14 11.2386 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="홍길동"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={styles.input}
-                    />
-                  </div>
+            <form onSubmit={handleSubmit} className={styles.form}>
+              {/* Name Field */}
+              <div className={styles.formField}>
+                <label className={styles.label} htmlFor="name">
+                  이름
+                </label>
+                <div className={styles.inputWrapper}>
+                  <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 14C2 11.2386 4.23858 9 7 9H9C11.7614 9 14 11.2386 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    placeholder="홍길동"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={styles.input}
+                  />
                 </div>
-
-                {/* Email Field */}
-                <div className={styles.formField}>
-                  <label className={styles.label}>이메일</label>
-                  <div className={styles.inputWrapper}>
-                    <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M2 4L8 9L14 4M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={styles.input}
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div className={styles.formField}>
-                  <label className={styles.label}>비밀번호</label>
-                  <div className={styles.inputWrapper}>
-                    <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M4 7V5C4 2.79086 5.79086 1 8 1C10.2091 1 12 2.79086 12 5V7M4 7H12M4 7H3C2.44772 7 2 7.44772 2 8V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13V8C14 7.44772 13.5523 7 13 7H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="••••••••"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={styles.input}
-                    />
-                  </div>
-                </div>
-
-                {/* Confirm Password Field */}
-                <div className={styles.formField}>
-                  <label className={styles.label}>비밀번호 확인</label>
-                  <div className={styles.inputWrapper}>
-                    <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M4 7V5C4 2.79086 5.79086 1 8 1C10.2091 1 12 2.79086 12 5V7M4 7H12M4 7H3C2.44772 7 2 7.44772 2 8V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13V8C14 7.44772 13.5523 7 13 7H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="••••••••"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className={styles.input}
-                    />
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <button type="submit" className={styles.submitButton}>
-                  계정 만들기
-                </button>
-              </form>
-
-              {/* Login Link */}
-              <div className={styles.loginLink}>
-                <span>이미 계정이 있으신가요?</span>
-                <button className={styles.loginButton} onClick={() => navigate('/login')}>로그인</button>
               </div>
+
+              {/* Email Field */}
+              <div className={styles.formField}>
+                <label className={styles.label} htmlFor="email">
+                  이메일
+                </label>
+                <div className={styles.inputWrapper}>
+                  <img src={emailIcon} alt="email" className={styles.inputIcon} />
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className={styles.formField}>
+                <label className={styles.label} htmlFor="password">
+                  비밀번호
+                </label>
+                <div className={styles.inputWrapper}>
+                  <img src={lockIcon} alt="lock" className={styles.inputIcon} />
+                  <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className={styles.formField}>
+                <label className={styles.label} htmlFor="confirmPassword">
+                  비밀번호 확인
+                </label>
+                <div className={styles.inputWrapper}>
+                  <img src={lockIcon} alt="lock" className={styles.inputIcon} />
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && <p className={styles.errorMessage}>{error}</p>}
+
+              <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+                {isSubmitting ? '계정 생성 중...' : '계정 만들기'}
+              </button>
+            </form>
+
+            <div className={styles.switchAuth}>
+              <span>이미 계정이 있으신가요?</span>
+              <button type="button" onClick={() => navigate('/login')}>
+                로그인
+              </button>
             </div>
           </div>
-
-          {/* Footer Text */}
-          <p className={styles.footerText}>
-            계정을 만들면{' '}
-            <a href="#" className={styles.footerLink}>이용약관</a>
-            과{' '}
-            <a href="#" className={styles.footerLink}>개인정보처리방침</a>
-            에 동의하는 것으로 간주됩니다
-          </p>
         </div>
+
+        <p className={styles.termsText}>
+          계정을 만들면
+          <button type="button">이용약관</button>
+          과
+          <button type="button">개인정보처리방침</button>
+          에 동의하는 것으로 간주됩니다
+        </p>
       </div>
     </div>
   );
 };
 
 export default SignUp;
-

@@ -8,8 +8,7 @@ Spring Boot 기반 백엔드 애플리케이션입니다.
 - Java 17
 - Gradle 8.5
 - Spring Data JPA
-- H2 Database (개발용)
-- PostgreSQL (프로덕션용)
+- PostgreSQL
 
 ## 실행 방법
 
@@ -26,12 +25,25 @@ Spring Boot 기반 백엔드 애플리케이션입니다.
 ./gradlew test
 ```
 
-### 프로파일 설정
+### 프로파일 설정 및 환경 변수
+
+애플리케이션은 기본적으로 PostgreSQL을 사용합니다. 아래 환경 변수를 설정하여 연결 정보를 지정할 수 있습니다.
+
+| 변수 | 기본값 | 설명 |
+| --- | --- | --- |
+| `DATABASE_URL` | `jdbc:postgresql://localhost:5432/shortformradar` | JDBC URL |
+| `DATABASE_USERNAME` | `postgres` | 데이터베이스 사용자 |
+| `DATABASE_PASSWORD` | `password` | 데이터베이스 비밀번호 |
+
+```
+# 예: 개발 환경에서 실행
+DATABASE_URL=jdbc:postgresql://localhost:5432/shortformradar_dev \
+DATABASE_USERNAME=postgres \
+DATABASE_PASSWORD=postgres \
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
 
 ```bash
-# 개발 환경
-./gradlew bootRun --args='--spring.profiles.active=dev'
-
 # 프로덕션 환경
 ./gradlew bootRun --args='--spring.profiles.active=prod'
 ```
@@ -39,7 +51,6 @@ Spring Boot 기반 백엔드 애플리케이션입니다.
 ## API 엔드포인트
 
 - Health Check: `GET /api/health`
-- H2 Console: `http://localhost:8080/api/h2-console`
 
 ## 프로젝트 구조
 

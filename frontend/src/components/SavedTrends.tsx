@@ -1,61 +1,84 @@
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSavedTrends, useRemoveSavedTrend } from '../hooks/useSaved';
 import styles from './SavedTrends.module.css';
-import UserMenu from './UserMenu';
 import StatCard from './common/StatCard';
 import GradientButton from './common/GradientButton';
 
-type SavedTrend = {
-  id: number;
-  platform: 'TikTok' | 'Instagram' | 'YouTube';
-  title: string;
-  growth: string;
-  views: string;
-  engagement: string;
-  date: string;
-  saved: boolean;
+const compactFormatter = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+const formatPlatformLabel = (platform?: string) => {
+  switch (platform?.toUpperCase()) {
+    case 'TIKTOK':
+      return 'TikTok';
+    case 'REELS':
+    case 'INSTAGRAM':
+      return 'Instagram';
+    case 'SHORTS':
+    case 'YOUTUBE':
+      return 'YouTube';
+    default:
+      return platform ?? 'TikTok';
+  }
 };
 
-const initialSavedTrends: SavedTrend[] = [
-  { id: 1, platform: 'TikTok', title: '겨울 패션 하울', growth: '+245%', views: '2.4M', engagement: '18.5%', date: '2024-01-12', saved: true },
-  { id: 2, platform: 'TikTok', title: '여행 VLOG', growth: '+267%', views: '2.8M', engagement: '23.6%', date: '2024-01-14', saved: false },
-  { id: 3, platform: 'TikTok', title: '반려동물 일상', growth: '+289%', views: '3.1M', engagement: '26.8%', date: '2024-01-15', saved: false },
-];
+const formatGrowth = (growth?: number) => {
+  if (growth === undefined || growth === null) return '—';
+  const sign = growth >= 0 ? '+' : '';
+  return `${sign}${growth}%`;
+};
+
+const formatViews = (views?: number) => {
+  if (!views) return '—';
+  return `${compactFormatter.format(views)} 조회`;
+};
 
 const SavedTrends: FunctionComponent = () => {
   const navigate = useNavigate();
-  const [savedTrends, setSavedTrends] = useState(initialSavedTrends);
+  const { data, isLoading, error, refetch } = useSavedTrends();
+  const { mutate: removeTrend, isLoading: isRemoving } = useRemoveSavedTrend(refetch);
+
+  const savedTrends = useMemo(
+    () =>
+      (data ?? []).map((trend) => ({
+        id: trend.id,
+        title: trend.title,
+        platform: formatPlatformLabel(trend.platform),
+        growth: formatGrowth(trend.growthRate),
+        views: formatViews(trend.viewCount),
+        engagement: '—',
+        date: trend.createdAt ? new Date(trend.createdAt).toLocaleDateString() : '—',
+      })),
+    [data]
+  );
 
   const stats = useMemo(() => {
     const platformCounts = savedTrends.reduce(
       (acc, trend) => {
-        acc[trend.platform] += 1;
+        acc[trend.platform] = (acc[trend.platform] ?? 0) + 1;
         return acc;
       },
-      { TikTok: 0, Instagram: 0, YouTube: 0 }
+      {} as Record<string, number>
     );
     return {
       total: savedTrends.length,
-      platformCounts,
+      platformCounts: {
+        TikTok: platformCounts['TikTok'] ?? 0,
+        Instagram: platformCounts['Instagram'] ?? 0,
+        YouTube: platformCounts['YouTube'] ?? 0,
+      },
     };
   }, [savedTrends]);
 
   const handleRemove = (id: number) => {
-    setSavedTrends((prev) => prev.filter((trend) => trend.id !== id));
+    removeTrend(id);
   };
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerContainer}>
-          <div className={styles.logoContainer} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <div className={styles.logoIcon}></div>
-            <span className={styles.logoText}>ShortForm Radar</span>
-          </div>
-          <UserMenu />
-        </div>
-      </header>
-
       <main className={styles.main}>
         <section className={styles.titleSection}>
           <h1 className={styles.pageTitle}>저장된 트렌드</h1>
@@ -69,10 +92,13 @@ const SavedTrends: FunctionComponent = () => {
           <StatCard label="YouTube" value={stats.platformCounts.YouTube} accentColor="#25f4ee" />
         </section>
 
+        {isLoading && <p className={styles.statusMessage}>저장한 트렌드를 불러오는 중입니다...</p>}
+        {error && <p className={styles.statusMessageError}>오류: {error.message}</p>}
+
         <section className={styles.trendsGrid}>
           {savedTrends.map((trend) => (
             <article key={trend.id} className={styles.trendCard}>
-              <div className={`${styles.platformBar} ${styles[`platformBar${trend.platform}`]}`} />
+              <div className={`${styles.platformBar} ${styles[`platformBar${trend.platform}`] || ''}`} />
               <div className={styles.trendContent}>
                 <div className={styles.trendHeader}>
                   <div>
@@ -81,10 +107,11 @@ const SavedTrends: FunctionComponent = () => {
                   </div>
                   <div className={styles.trendActions}>
                     <button
-                      className={`${styles.iconButton} ${trend.saved ? styles.iconButtonActive : ''}`}
+                      className={`${styles.iconButton} ${styles.iconButtonActive}`}
                       type="button"
                       onClick={() => handleRemove(trend.id)}
                       aria-label="저장 해제"
+                      disabled={isRemoving}
                     >
                       ★
                     </button>
@@ -123,6 +150,9 @@ const SavedTrends: FunctionComponent = () => {
               </div>
             </article>
           ))}
+          {!isLoading && savedTrends.length === 0 && !error && (
+            <p className={styles.emptyMessage}>저장된 트렌드가 없습니다.</p>
+          )}
         </section>
       </main>
     </div>

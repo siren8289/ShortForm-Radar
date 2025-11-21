@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authStorage } from '../api/client';
+import { getMe, getStoredUser, User } from '../api/auth';
 import styles from './UserMenu.module.css';
 
 const menuItems = [
@@ -12,6 +14,7 @@ const menuItems = [
 const UserMenu = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(getStoredUser());
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -37,6 +40,12 @@ const UserMenu = () => {
     };
   }, []);
 
+  useEffect(() => {
+    getMe()
+      .then(setUser)
+      .catch(() => null);
+  }, []);
+
   const handleNavigate = (path: string) => {
     setIsOpen(false);
     navigate(path);
@@ -44,6 +53,7 @@ const UserMenu = () => {
 
   const handleLogout = () => {
     setIsOpen(false);
+    authStorage.clear();
     navigate('/login');
   };
 
@@ -54,7 +64,7 @@ const UserMenu = () => {
           <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor" />
           <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor" />
         </svg>
-        <span className={styles.triggerLabel}>사용자</span>
+        <span className={styles.triggerLabel}>{user?.email ?? '사용자'}</span>
       </button>
       {isOpen && (
         <div className={styles.menu}>

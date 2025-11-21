@@ -2,14 +2,32 @@ import { FunctionComponent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ForgotPassword.module.css';
 
+// Import SVG icons from assets
+import backArrowIcon from '../assets/1d80a45a701e6bc73343d179556c42dc302e21fd.svg';
+import logoIcon from '../assets/3081358298afa247202b27fb6c5bf8f4b38ff134.svg';
+import emailIcon from '../assets/88753f9926800c90d5ced166d16472f754a6ff67.svg';
+
 const ForgotPassword: FunctionComponent = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
     // TODO: Integrate password reset API
-    console.log('Send reset link to', email);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setSuccess(true);
+    } catch (err) {
+      setError((err as Error).message ?? '재설정 링크 전송에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -22,62 +40,59 @@ const ForgotPassword: FunctionComponent = () => {
 
       <div className={styles.content}>
         <button className={styles.backButton} onClick={() => navigate('/')}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <img src={backArrowIcon} alt="back" className={styles.backIcon} />
           <span>홈으로</span>
         </button>
 
         <div className={styles.logoContainer}>
-          <div className={styles.logoIcon}>
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <path d="M20 5L30 15L20 25L10 15L20 5Z" fill="url(#forgotLogoGradient)" />
-              <defs>
-                <linearGradient id="forgotLogoGradient" x1="10" y1="5" x2="30" y2="25" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#fe2c55" />
-                  <stop offset="1" stopColor="#9d4edd" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+          <img src={logoIcon} alt="ShortForm Radar" className={styles.logoIcon} />
           <h1 className={styles.logoText}>ShortForm Radar</h1>
         </div>
 
         <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>비밀번호 찾기</h2>
-            <p className={styles.cardSubtitle}>가입하신 이메일로 재설정 링크를 보내드립니다</p>
-          </div>
-
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.formField}>
-              <label className={styles.label} htmlFor="email">
-                이메일
-              </label>
-              <div className={styles.inputWrapper}>
-                <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2 4L8 9L14 4M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className={styles.input}
-                  required
-                />
-              </div>
+          <div className={styles.cardInner}>
+            <div className={styles.cardHeader}>
+              <h2 className={styles.cardTitle}>비밀번호 찾기</h2>
+              <p className={styles.cardSubtitle}>가입하신 이메일로 재설정 링크를 보내드립니다</p>
             </div>
 
-            <button type="submit" className={styles.submitButton}>
-              재설정 링크 보내기
-            </button>
-          </form>
+            {success ? (
+              <div className={styles.successMessage}>
+                <p>재설정 링크가 이메일로 전송되었습니다.</p>
+                <p>이메일을 확인해주세요.</p>
+              </div>
+            ) : (
+              <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.formField}>
+                  <label className={styles.label} htmlFor="email">
+                    이메일
+                  </label>
+                  <div className={styles.inputWrapper}>
+                    <img src={emailIcon} alt="email" className={styles.inputIcon} />
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className={styles.input}
+                      required
+                    />
+                  </div>
+                </div>
 
-          <button className={styles.returnButton} type="button" onClick={() => navigate('/login')}>
-            ← 로그인으로 돌아가기
-          </button>
+                {error && <p className={styles.errorMessage}>{error}</p>}
+
+                <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+                  {isSubmitting ? '전송 중...' : '재설정 링크 보내기'}
+                </button>
+              </form>
+            )}
+
+            <button className={styles.returnButton} type="button" onClick={() => navigate('/login')}>
+              ← 로그인으로 돌아가기
+            </button>
+          </div>
         </div>
 
         <p className={styles.termsText}>

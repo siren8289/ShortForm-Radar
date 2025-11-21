@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from './layout/PageHeader';
 import styles from './LandingPage.module.css';
 
+// Import SVG icons from assets
+import arrowUpIcon from '../assets/a873fc4d5057b06d350161590dcbca0d030f38b1.svg';
+import realtimeIcon from '../assets/5e15bdee2dadcea90faf58e1b43ef0f95f0710b1.svg';
+import comparisonIcon from '../assets/2c06e629f70ed1a1cea5dfc16c7b6c759ed348b2.svg';
+import saveIcon from '../assets/f29796809a9c31e6bb8072229e20a0c886d3ad31.svg';
+import logoIcon from '../assets/c0bebfffc4ca9c64b418dffa2a1390fc87d25680.svg';
+import footerLogoIcon from '../assets/b43b3d24922c6cdf6c31e2a9e71146560ce926c2.svg';
+import arrowRightIcon from '../assets/c8a8c27bcbea01be33001a492208dc9aafc6884e.svg';
+import headerLogoIcon from '../assets/3dc016d4da6dcec095ffb930d7bfabec4b89fe86.svg';
+
 const LandingPage: FunctionComponent = () => {
   const navigate = useNavigate();
 
@@ -99,17 +109,15 @@ const LandingPage: FunctionComponent = () => {
             <span>실시간으로 업데이트되는 숏폼 트렌드</span>
           </div>
           <h1 className={styles.heroTitle}>
-            지금 뜨는 숏폼 트렌드를
-            <span className={styles.gradientText}> 한눈에 확인하세요</span>
+            <span>지금 뜨는 숏폼 트렌드를</span>
+            <span className={styles.gradientText}>한눈에 확인하세요</span>
           </h1>
           <p className={styles.heroDescription}>
             TikTok, Instagram Reels, YouTube Shorts의 최신 트렌드를 실시간으로 추적하고 분석합니다
           </p>
           <button className={styles.ctaButton} onClick={() => navigate('/dashboard')}>
             <span>트렌드 보기</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <img src={arrowRightIcon} alt="arrow right" className={styles.ctaArrow} />
           </button>
         </div>
         <div className={styles.heroBackground}>
@@ -142,7 +150,7 @@ const LandingPage: FunctionComponent = () => {
               </div>
               <h3 className={styles.trendHashtag}>{trend.hashtag}</h3>
               <div className={styles.trendGrowth}>
-                <span className={styles.arrowUp}>↑</span>
+                <img src={arrowUpIcon} alt="arrow up" className={styles.arrowIcon} />
                 <span className={styles.growthText}>{trend.growth}</span>
                 <span className={styles.timeText}>24시간</span>
               </div>
@@ -153,6 +161,15 @@ const LandingPage: FunctionComponent = () => {
 
       {/* Platform Overview Section */}
       <section className={styles.section}>
+        <div className={styles.sectionHeader} style={{ opacity: 0, visibility: 'hidden', height: 0, margin: 0, padding: 0 }}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>📱</span>
+            지원 플랫폼
+          </h2>
+          <p className={styles.sectionSubtitle}>
+            3개 주요 숏폼 플랫폼의 트렌드를 한곳에서
+          </p>
+        </div>
         <div className={styles.platformsGrid}>
           {platforms.map((platform) => (
             <div key={platform.name} className={styles.platformCard}>
@@ -181,15 +198,18 @@ const LandingPage: FunctionComponent = () => {
           </p>
         </div>
         <div className={styles.featuresGrid}>
-          {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard}>
-              <div className={styles.featureIconContainer} style={{ background: feature.gradient }}>
-                <span className={styles.featureIcon}>{feature.icon}</span>
+          {features.map((feature, index) => {
+            const iconSrc = index === 0 ? realtimeIcon : index === 1 ? comparisonIcon : saveIcon;
+            return (
+              <div key={index} className={styles.featureCard}>
+                <div className={styles.featureIconContainer} style={{ background: feature.gradient }}>
+                  <img src={iconSrc} alt={feature.title} className={styles.featureIcon} />
+                </div>
+                <h3 className={styles.featureTitle}>{feature.title}</h3>
+                <p className={styles.featureDescription}>{feature.description}</p>
               </div>
-              <h3 className={styles.featureTitle}>{feature.title}</h3>
-              <p className={styles.featureDescription}>{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -199,7 +219,7 @@ const LandingPage: FunctionComponent = () => {
           <div className={styles.footerTop}>
             <div className={styles.footerColumn}>
               <div className={styles.footerLogo}>
-                <div className={styles.footerLogoIcon}></div>
+                <img src={footerLogoIcon} alt="ShortForm Radar" className={styles.footerLogoIcon} />
                 <span className={styles.footerLogoText}>ShortForm Radar</span>
               </div>
               <p className={styles.footerDescription}>실시간 숏폼 트렌드 분석</p>

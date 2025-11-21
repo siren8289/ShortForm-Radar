@@ -113,6 +113,20 @@
   margin: 0;
 }
 
+.loadingText,
+.errorText {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.loadingText {
+  color: #a0a0a0;
+}
+
+.errorText {
+  color: #ff6b6b;
+}
+
 .actionButtons {
   display: flex;
   gap: 8px;

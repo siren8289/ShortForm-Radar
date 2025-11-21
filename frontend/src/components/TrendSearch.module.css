@@ -168,6 +168,67 @@
   margin: 0;
 }
 
+.resultsStatus {
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.resultsStatusError {
+  font-size: 14px;
+  color: #ff6b6b;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.resultCard {
+  background-color: #1a1a1a;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resultTitle {
+  font-size: 18px;
+  margin: 0;
+}
+
+.resultPlatform {
+  font-size: 14px;
+  color: #a0a0a0;
+  margin: 4px 0 0;
+}
+
+.resultMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.resultButton {
+  margin-top: auto;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fe2c55, #9d4edd);
+  color: #f5f5f5;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.resultButton:hover {
+  transform: translateY(-2px);
+}
+
 .emptyState {
   background-color: #1a1a1a;
   border: 1px solid #1a1a1a;
